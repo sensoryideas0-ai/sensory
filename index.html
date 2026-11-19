@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sensory · Creador de webs para negocios locales</title>
+<style>
+  :root { --bg:#f6f6f4; --card:#fff; --text:#1b1b1b; --muted:#666; --accent:#0f766e; --border:#ddd; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#111; --card:#1b1b1b; --text:#eee; --muted:#aaa; --accent:#2dd4bf; --border:#333; }
+  }
+  * { box-sizing: border-box; }
+  body { margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; background:var(--bg); color:var(--text); }
+  main { max-width: 1100px; margin: 0 auto; padding: 24px 16px; display:grid; gap:24px; grid-template-columns: 1fr; }
+  @media (min-width: 900px) { main { grid-template-columns: 380px 1fr; } }
+  h1 { font-size: 1.4rem; margin: 0 0 4px; }
+  p.sub { color: var(--muted); margin: 0 0 16px; }
+  form, .preview { background: var(--card); border:1px solid var(--border); border-radius: 12px; padding: 16px; }
+  label { display:block; font-size:.85rem; font-weight:600; margin:12px 0 4px; }
+  input, textarea, select { width:100%; padding:10px; border:1px solid var(--border); border-radius:8px; background:var(--bg); color:var(--text); font: inherit; }
+  textarea { min-height: 80px; resize: vertical; }
+  .row { display:flex; gap:8px; margin-top:16px; flex-wrap: wrap; }
+  button { padding:10px 14px; border:0; border-radius:8px; background:var(--accent); color:#fff; font-weight:600; cursor:pointer; }
+  button.secondary { background: transparent; color: var(--text); border:1px solid var(--border); }
+  iframe { width:100%; height:70vh; border:1px solid var(--border); border-radius:8px; background:#fff; }
+</style>
+</head>
+<body>
+<main>
+  <form id="f">
+    <h1>Creador de webs para negocios locales</h1>
+    <p class="sub">Rellena los datos y descarga una web lista para publicar. Gratis y de código abierto.</p>
+
+    <label for="nombre">Nombre del negocio</label>
+    <input id="nombre" value="Peluquería Lucía">
+
+    <label for="sector">Sector</label>
+    <select id="sector">
+      <option value="peluqueria">Peluquería / estética</option>
+      <option value="restaurante">Bar / restaurante</option>
+      <option value="taller">Taller / reparaciones</option>
+      <option value="clinica">Clínica / salud</option>
+      <option value="tienda">Tienda</option>
+      <option value="otro">Otro</option>
+    </select>
+
+    <label for="lema">Frase principal</label>
+    <input id="lema" value="Tu pelo, en las mejores manos del barrio">
+
+    <label for="servicios">Servicios (uno por línea)</label>
+    <textarea id="servicios">Corte y peinado
+Coloración
+Tratamientos capilares</textarea>
+
+    <label for="direccion">Dirección</label>
+    <input id="direccion" value="Calle Mayor 1, Benidorm">
+
+    <label for="telefono">Teléfono / WhatsApp</label>
+    <input id="telefono" value="600000000">
+
+    <label for="horario">Horario</label>
+    <input id="horario" value="Lunes a sábado, 9:00 a 20:00">
+
+    <label for="color">Color de marca</label>
+    <input id="color" type="color" value="#0f766e">
+
+    <div class="row">
+      <button type="button" id="descargar">Descargar web (.html)</button>
+      <button type="button" class="secondary" id="copiar">Copiar código</button>
+    </div>
+  </form>
+
+  <section class="preview">
+    <iframe id="vista" title="Vista previa de la web"></iframe>
+  </section>
+</main>
+
+<script>
+const ICONOS = { peluqueria:'✂️', restaurante:'🍽️', taller:'🔧', clinica:'🩺', tienda:'🛍️', otro:'⭐' };
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+function generar() {
+  const d = {
+    nombre: $('nombre').value.trim() || 'Mi negocio',
+    sector: $('sector').value,
+    lema: $('lema').value.trim(),
+    servicios: $('servicios').value.split('\n').map(s => s.trim()).filter(Boolean),
+    direccion: $('direccion').value.trim(),
+    telefono: $('telefono').value.replace(/[^\d+]/g, ''),
+    horario: $('horario').value.trim(),
+    color: $('color').value
+  };
+  const mapa = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(d.nombre + ' ' + d.direccion);
+  const wa = 'https://wa.me/' + (d.telefono.startsWith('+') ? d.telefono.slice(1) : (d.telefono.length === 9 ? '34' + d.telefono : d.telefono));
+  return `<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>${esc(d.nombre)}</title>
+<meta name="description" content="${esc(d.lema)}">
+<style>
+body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;color:#1b1b1b;line-height:1.5}
+header{background:${d.color};color:#fff;padding:64px 20px;text-align:center}
+header h1{margin:0 0 8px;font-size:2.2rem} header p{margin:0 0 24px;font-size:1.1rem;opacity:.95}
+.btn{display:inline-block;background:#fff;color:${d.color};padding:12px 20px;border-radius:999px;font-weight:700;text-decoration:none}
+section{max-width:800px;margin:0 auto;padding:40px 20px} h2{color:${d.color}}
+ul{padding:0;list-style:none;display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(200px,1fr))}
+li{border:1px solid #e5e5e5;border-radius:12px;padding:16px;font-weight:600}
+footer{text-align:center;color:#777;font-size:.85rem;padding:24px}
+</style></head><body>
+<header><div style="font-size:2.5rem">${ICONOS[d.sector] || '⭐'}</div><h1>${esc(d.nombre)}</h1><p>${esc(d.lema)}</p>
+<a class="btn" href="${wa}">Escríbenos por WhatsApp</a></header>
+<section><h2>Servicios</h2><ul>${d.servicios.map(s => `<li>${esc(s)}</li>`).join('')}</ul></section>
+<section><h2>Dónde estamos</h2><p>${esc(d.direccion)}<br>${esc(d.horario)}</p>
+<p><a href="${mapa}">Ver en Google Maps</a> · <a href="tel:${esc(d.telefono)}">Llamar</a></p></section>
+<footer>© ${new Date().getFullYear()} ${esc(d.nombre)}</footer>
+</body></html>`;
+}
+
+function actualizar() { $('vista').srcdoc = generar(); }
+document.querySelectorAll('input, textarea, select').forEach(el => el.addEventListener('input', actualizar));
+$('descargar').onclick = () => {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([generar()], { type: 'text/html' }));
+  a.download = ($('nombre').value.trim() || 'web').toLowerCase().replace(/[^a-z0-9]+/g, '-') + '.html';
+  a.click();
+};
+$('copiar').onclick = async () => {
+  try { await navigator.clipboard.writeText(generar()); $('copiar').textContent = '¡Copiado!'; }
+  catch { $('copiar').textContent = 'No se pudo copiar'; }
+  setTimeout(() => $('copiar').textContent = 'Copiar código', 1500);
+};
+actualizar();
+</script>
+</body>
+</html>
